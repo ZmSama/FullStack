@@ -7,9 +7,11 @@ import { Global, Module } from '@nestjs/common';
 import { DbService } from './db.service';
 import { TypegooseModule } from 'nestjs-typegoose';
 import { User } from './models/user.model';
+import { Course } from './models/course.model';
+import { Epicode } from './models/episode.model';
 
 // 全局引用实体模块，导出全局使用
-const models = TypegooseModule.forFeature([User]);
+const models = TypegooseModule.forFeature([User, Course, Epicode]);
 @Global()
 @Module({
   imports: [
