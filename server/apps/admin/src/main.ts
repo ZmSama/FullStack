@@ -9,6 +9,8 @@ import { AdminModule } from './admin.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AdminModule);
+  // 允许跨域
+  app.enableCors();
   const config = new DocumentBuilder()
     .setTitle('《全栈之巅》up主的全栈项目后台接口文档')
     .setDescription('这是为后台管理准备的API')
