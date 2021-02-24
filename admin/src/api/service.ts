@@ -39,17 +39,18 @@ service.interceptors.request.use(
 service.interceptors.response.use(
   (response: any) => {
     const { res, status } = response;
-    if (status !== 200) {
+    if (status !== 200 && status !== 201) {
       (ElMessage as any).error({
-        content: res.info || "Error",
+        content: "请求出错",
         duration: 5,
         background: true,
       });
       // 若后台返回错误值，此处返回对应错误对象，下面 error 就会接收
-      return Promise.reject(new Error(res.info || "Error"));
+      return Promise.reject(new Error("Error"));
     } else {
       // 注意返回值
-      return response.data;
+
+      return Object.assign(response.data, { code: status, sucess: true });
     }
   },
   (error: any) => {
