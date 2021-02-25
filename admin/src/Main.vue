@@ -9,11 +9,15 @@
       <Menu />
     </el-aside>
     <el-container>
-      <el-header>这是头部</el-header>
+      <el-header>
+        <h3>全栈之巅视频网站后台管理系统</h3>
+      </el-header>
       <el-main>
         <router-view></router-view>
       </el-main>
-      <el-footer>Footer</el-footer>
+      <!-- <el-footer>
+   
+      </el-footer> -->
     </el-container>
   </el-container>
 </template>

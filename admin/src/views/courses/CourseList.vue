@@ -15,7 +15,8 @@
     <el-table
       style="width: 100%"
       size="mini"
-      :data="state.data"
+      :data="data"
+      max-height="500px"
       v-loading="loading"
     >
       <el-table-column
@@ -30,30 +31,49 @@
       <el-table-column fixed="right" label="操作" align="center" width="300">
         <template #default="scope">
           <el-button
-            @click="handleClick(scope.row)"
+            @click="editCourse(scope.row)"
             icon="el-icon-edit"
             type="primary"
             size="mini"
             >编辑</el-button
           >
-          <el-button type="danger" icon="el-icon-delete" size="mini"
+          <el-button
+            type="danger"
+            @click="deleteCourse(scope.row)"
+            icon="el-icon-delete"
+            size="mini"
             >删除</el-button
           >
         </template>
       </el-table-column>
     </el-table>
+
+    <div class="footer">
+      <el-pagination
+        @size-change="handleSizeChange"
+        @current-change="handleCurrentChange"
+        :page-sizes="[10, 20, 30, 40]"
+        :page-size="page.pageSize"
+        layout="total, sizes, prev, pager, next, jumper"
+        :total="page.pageTotal"
+      >
+      </el-pagination>
+    </div>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent, ref } from "vue";
 import { useRouter } from "vue-router";
-import useCourseList from "./hooks/useCourseList";
+import useDeleteCourse from "./hooks/useDeleteCourse";
+import { GET_COURSE_LIST } from "../../api/models/course";
 
 export default defineComponent({
   name: "CourseList",
   setup(props) {
-    const { loading, state, getList } = useCourseList();
+    const loading = ref(false);
+    const data = ref([]);
+
     const router = useRouter(); //导入路由
     const tableFiled = ref([
       {
@@ -76,22 +96,68 @@ export default defineComponent({
       },
     ]);
 
-    const handleClick = (row: Object) => {
-      console.log(row);
-    };
-
+    const page = ref({
+      pageCurrent: 1,
+      pageSize: 10,
+      pageTotal: 0,
+    });
     // 去新增页面
     const toAddPage = () => {
       router.push("addCourse");
     };
 
+    // 编辑
+    const editCourse = (val: any) => {
+      router.push({
+        path: "addCourse",
+        query: {
+          id: val._id,
+        },
+      });
+    };
+    // 删除
+    const deleteCourse = (val: any) => {
+      useDeleteCourse(val._id, getList);
+    };
+
+    // 改变分页条数
+    const handleSizeChange = (val: any) => {
+      page.value.pageSize = val;
+      getList();
+    };
+
+    // 分页方法
+    const handleCurrentChange = (val: any) => {
+      page.value.pageCurrent = val;
+      getList();
+    };
+
+    // 列表方法
+    const getList = async () => {
+      loading.value = true;
+      const res: any = await GET_COURSE_LIST({
+        query: {
+          limit: page.value.pageSize,
+          page: page.value.pageCurrent,
+        },
+      });
+      data.value = res.data;
+      page.value.pageTotal = res.total;
+      page.value.pageCurrent = res.page;
+      loading.value = false;
+    };
+
     getList();
     return {
       loading,
-      state,
+      data,
       tableFiled,
-      handleClick,
+      editCourse,
       toAddPage,
+      deleteCourse,
+      page,
+      handleSizeChange,
+      handleCurrentChange,
     };
   },
 });
@@ -104,5 +170,10 @@ export default defineComponent({
     font-weight: 600;
     padding-right: 20px;
   }
+}
+.footer {
+  position: absolute;
+  right: 20px;
+  bottom: 30px;
 }
 </style>
